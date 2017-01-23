@@ -1,0 +1,121 @@
+#Part 1: Greedy Cow Transport
+
+import operator
+def greedy_cow_transport(cows, param):
+    sortcows =  sorted(cows.items(), key=operator.itemgetter(1),reverse=True)
+    result = []
+    weight = []
+    names = []
+    cargo = []
+    total = 0
+    idx = 0
+    sub = []
+    final = []
+    transport = []
+    for t in sortcows:
+        for x in t:
+            result.append(x)
+            weight = result[1::2]
+            names = result[::2]
+           
+    while len(weight) !=0:
+        while True :
+            try:
+                if total + weight[idx] <=param:
+                    total = total + weight[idx]
+                    transport.append(weight[idx])
+                    del weight[idx]
+                    #idx = idx + 1 
+                else:
+                    idx = idx + 1
+            except IndexError:
+                cargo.append(transport)
+                total = 0
+                idx = 0
+                transport = []
+                break
+    for i in cargo:
+        sub = []
+        final.append(sub)
+        for k, v in cows.items():
+            for x in i:
+                if x == v:
+                   sub.append(k)
+    print(final)
+    
+#Part 2: Brute Force Cow Transport         
+def brute_force_cow_transport(cows, limit):
+    """
+    Finds the allocation of cows that minimizes the number of spaceship trips
+    via brute force.
+    
+    Parameters:
+    cows - a dictionary of name (string), weight (float) pairs
+    limit - weight limit of the spaceship
+    
+    Returns:
+    A list of lists, with each inner list containing the names of cows
+    transported on a particular trip and the overall list containing all the
+    trips
+    """
+    def addCowWeight(list, cows):
+        """adds a list of cows, with value coming from dict"""
+        sum = 0.0
+        for key in list:
+            sum += cows[key]
+        return sum
+
+    #list of cows
+    cowName = (cows.keys())
+    #print(cowName)
+    ##cowName = ['Maggie', 'Lola', 'Oreo']
+
+    #list to store all partitions and useful ones
+    allPart = []
+    usePart = []
+    
+    for part in get_partitions(cowName):
+        allPart.append(part)
+    
+
+    #make a test that checks each trip list if their sum <= limit
+    #adds each partition that passes all tests to usePart
+    for part in allPart:
+        test = []
+        for trip in part:
+            if addCowWeight(trip, cows) <= limit:
+                test.append(trip)
+    
+        if len(test) == len(part):
+            usePart.append(part)
+
+    #find all the lengths of each option, and search for smallest
+    lenIndex = []
+    for part in usePart:
+        lenIndex.append(len(part))
+    
+    find = min(lenIndex)
+
+    for part in usePart:
+        if len(part) == find:
+            return part
+        
+def partitions(set_):
+    if not set_:
+        yield []
+        return
+    for i in range(2**len(set_)//2):
+        parts = [set(), set()]
+        for item in set_:
+            parts[i&1].add(item)
+            i >>= 1
+        for b in partitions(parts[1]):
+            yield [parts[0]]+b
+
+
+# This is a helper function that will fetch all of the available 
+# partitions for you to use for your brute force algorithm.
+def get_partitions(set_):
+    for partition in partitions(set_):
+        yield [list(elt) for elt in partition]
+
